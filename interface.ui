@@ -66,16 +66,6 @@
      </rect>
     </property>
    </widget>
-   <widget class="QTableView" name="tableView">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>150</y>
-      <width>151</width>
-      <height>191</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QPushButton" name="agregar">
     <property name="geometry">
      <rect>
@@ -185,11 +175,20 @@
      <string>Finalizar</string>
     </property>
    </widget>
+   <widget class="QTableWidget" name="tableWidget">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>150</y>
+      <width>241</width>
+      <height>201</height>
+     </rect>
+    </property>
+   </widget>
    <zorder>agregar</zorder>
    <zorder>label</zorder>
    <zorder>label_2</zorder>
    <zorder>modoInterpolacion</zorder>
-   <zorder>tableView</zorder>
    <zorder>quitar</zorder>
    <zorder>mostrarPasos</zorder>
    <zorder>label_3</zorder>
@@ -197,6 +196,7 @@
    <zorder>especializarPunto</zorder>
    <zorder>cambiarModo</zorder>
    <zorder>finalizar</zorder>
+   <zorder>tableWidget</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
