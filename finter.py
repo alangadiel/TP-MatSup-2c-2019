@@ -3,11 +3,12 @@ import re
 import math
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QTableWidgetItem, QLineEdit, QMessageBox, QAbstractItemView
-
 modo = ["Lagrange","NG Progresivo", "NG Regresivo"]
 
 modoSeleccionado = 0
-puntos = []
+
+xi = []
+yi = []
 
 qtCreatorFile = "interface.ui" # Nombre del archivo aquí
 
@@ -39,23 +40,28 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.modoInterpolacion.setText(modo[modoSeleccionado])
+
     def agregar_app(self):
-        punto = QInputDialog.getInt(self, "Agregar punto","Numero:", 0, 0, 100000, 1)    
-        if punto[1]:
-            puntos.append(punto[0])
-            row = len(puntos)
+        x = QInputDialog.getInt(self, "Agregar punto","Punto x:", 0, 0, 100000, 1)  
+        y = QInputDialog.getInt(self, "Agregar punto","Punto y:", 0, 0, 100000, 1)    
+        if x and y:
+            xi.append(x[0])
+            yi.append(y[0])
+            row = len(xi)
             self.tableWidget.setRowCount(row-1)
-            x = QTableWidgetItem(str(row))
-            y = QTableWidgetItem(str(punto[0]))
+            punto = QTableWidgetItem(str(x[0]))
+            imagen = QTableWidgetItem(str(y[0]))
             self.tableWidget.insertRow(row-1)
-            self.tableWidget.setItem(row-1, 0, x)
-            self.tableWidget.setItem(row-1, 1, y)
-            print(puntos)
+            self.tableWidget.setItem(row-1, 0, punto)
+            self.tableWidget.setItem(row-1, 1, imagen)
+            print(xi)
+            print(yi)
 
     def quitar_app(self):
-        if len(puntos) != 0:
-            puntos.pop()
-            row = len(puntos)
+        if len(yi) != 0:
+            xi.pop()
+            yi.pop()
+            row = len(xi)
             self.tableWidget.removeRow(row)
             self.tableWidget.setRowCount(row)
         else:
@@ -65,15 +71,23 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         QMessageBox.about(self, "Punto de especializacion", "El punto es")
 
     def especializarPunto_app(self):
-        punto = QInputDialog.getInt(self, "Agregar punto","Numero:", 0, 0, 100000, 1)    
-        QMessageBox.about(self, "Punto de especializacion", "El punto es")
+        punto, okPressed = QInputDialog.getText(self, "Especializar en un punto","Punto:", QLineEdit.Normal, "")
+        QMessageBox.about(self, "Punto de especializacion", "El punto es " + punto)
 
     def cambiarModo_app(self):
-        QMessageBox.about(self, "Punto de especializacion", "El punto es")
+        item, okPressed = QInputDialog.getItem(self, "Cambiar de modo","Modo:", modo, 0, False)
+        modoSeleccionado = modo.index(item)
+        self.modoInterpolacion.setText(modo[modoSeleccionado])
 
     def finalizar_app(self):
         sys.exit(app.exec_())
 
+    #def interpolacion_lagrange(self):
+        
+    #def interpolacion_NGProg(self):
+    
+    #def interpolacion_NGReg(self):
+    
 
 if __name__ == "__main__":
     app =  QtWidgets.QApplication(sys.argv)
