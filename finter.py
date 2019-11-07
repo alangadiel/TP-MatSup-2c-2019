@@ -6,8 +6,6 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QTableWidgetIte
 import numpy as np
 import sympy as sym
 
-
-
 modo = ["Lagrange","NG Progresivo", "NG Regresivo"]
 
 mostrarPasos = []
@@ -94,22 +92,32 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         if len(mostrarPasos) > 0:
             if self.modoSeleccionado == 0:
                 self.mostrarLagrange()
-            else: 
+            elif self.modoSeleccionado == 1: 
                 self.mostrarNGP()
+            else: 
+                self.mostrarNGR()
         else:
             QMessageBox.about(self, "Mensaje","No hay ningun polinomio todavia")
 
     def mostrarLagrange(self):
-        string = ""
+        string = "grado polinomio:" + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
         for i in range(len(mostrarPasos)):        
             string += "L" + str(i) + ": " + str(mostrarPasos[i]) + "\n"
         QMessageBox.about(self, "Mostrar Pasos", string)
     
-    def mostrarNGP(self):
-        string = ""
-        print(mostrarPasos)
+    def mostrarNGR(self):
+        string = "grado polinomio:" + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
         for i in range(len(mostrarPasos[0])):        
-            string += "a" + str(i) + ": " + str(mostrarPasos[0][i]) + "\n"
+            string += "b" + str(i) + ": " + str(mostrarPasos[0][i]) + "\n"
+        QMessageBox.about(self, "mostrarPasos", string)
+    
+    def mostrarNGP(self):
+        string = "grado polinomio:" + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
+        contador = 0
+        print(mostrarPasos[0])
+        for i in range(len(mostrarPasos[0]), 0, -1):        
+            string += "a" + str(contador) + ": " + str(mostrarPasos[0][i-1]) + "\n"
+            contador += 1
         QMessageBox.about(self, "mostrarPasos", string)
     
 
@@ -130,6 +138,7 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         if okPressed:
             self.modoSeleccionado = modo.index(item)
             self.modoInterpolacion.setText(modo[self.modoSeleccionado])
+            self.generarPolinomio()
 
     def finalizar_app(self):
         sys.exit(app.exec_())
@@ -147,13 +156,16 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
                 if (j!=i):
                     termino = termino*(x-xi[j])/(xi[i]-xi[j])
             polinomio = polinomio + termino*yi[i]
-            mostrarPasos.append(termino)
-
+            if len(xi) == 1:
+                mostrarPasos.append(termino)
+            else:
+                mostrarPasos.append(termino.expand()) 
         #Si es un solo elemento el expand me llora por eso el if
         # Simplifica el polinomio obtenido
         if len(xi) > 1:
             polinomio = polinomio.expand() 
         self.polinomio.setText(str(polinomio))
+        print(polinomio)
         # para evaluacion numérica
         especializacionEnPunto = sym.lambdify(x,polinomio)
     
@@ -163,6 +175,7 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         x = sym.Symbol('x')
         a = []
         termino = yi
+        mostrarPasos.clear()
         #Inicialzo a con los valores de la imagen(yi)
         for i in range(n):
             a.append(yi[i])
@@ -180,7 +193,7 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         #generar el polinomio 
         a[0] = yi[n-1]
         mostrarPasos.append(a)
-
+        
         #Genero el polinomio 
         polinomio = a[0]
         termino = 1
@@ -195,6 +208,7 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
             #Lo inicializo para la proxima pasada 
             termino = 1
         #por el expand si es un solo elemento
+
         if len(xi) > 1:
             polinomio = polinomio.expand() 
         # Escribo el polinomio y pongo la funcion para la especializacion de un punto     
@@ -206,6 +220,7 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         x = sym.Symbol('x')
         a = []
         termino = yi
+        mostrarPasos.clear()
         #Inicializo a con los valores de la imagen(yi)
         for i in range(n):
             a.append(yi[i])
@@ -219,9 +234,8 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
                 a[i] = float(a[i+1]-a[i])/float(xi[i+j]-xi[i])
         #Le agrego el unico valor de la imagen que me interesa en la ultima posicion del vector
         a[n-1] = yi[0]
-        print(a)
         mostrarPasos.append(a)
-
+        
         #Genero el polinomio 
         polinomio = a[n-1]
         termino = 1
@@ -232,16 +246,31 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
             for k in range(0, h, 1):
                 termino *= (x-xi[k])
             termino *= a[n-h-1]
-            print(termino)
             #Le sumo el termino al polinomio
             polinomio += termino
             #Lo inicializo para la proxima vuelta
             termino = 1
+
+        #Le paso los valores a mostrarPasos para poder mostrarlos 
+        #y doy vuelta la lista poque esta al reves
+       
+
         if len(xi) > 1:
             polinomio = polinomio.expand() 
         #Seteo la info en el el cuadro de texto del polinomio y pongo la funcion para especializar el punto
-        self.polinomio.setText(str(polinomio.expand()))
+        self.polinomio.setText(str(polinomio))
         especializacionEnPunto = sym.lambdify(x,polinomio)
+
+    def obtenerGradoPolinomio(self , polinomio):
+        pos = polinomio.find("**")
+        resultado = "0"
+        if pos == -1:
+            pos = polinomio.find("x")
+            if pos != -1:
+                resultado = "1"
+        else:
+            resultado = polinomio[pos+2:pos+3]
+        return resultado
 
 if __name__ == "__main__":
     app =  QtWidgets.QApplication(sys.argv)
