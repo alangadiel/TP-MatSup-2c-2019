@@ -122,8 +122,12 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
                     termino = termino*(x-xi[j])/(xi[i]-xi[j])
             polinomio = polinomio + termino*yi[i]
             mostrarPasos.append(termino)
-        # Simplifica el polinomio obtenido 
-        self.polinomio.setText(str(polinomio.expand()))
+
+        #Si es un solo elemento el expand me llora por eso el if
+        # Simplifica el polinomio obtenido
+        if len(xi) > 1:
+            polinomio = polinomio.expand() 
+        self.polinomio.setText(str(polinomio))
         # para evaluacion numérica
         especializacionEnPunto = sym.lambdify(x,polinomio)
     
@@ -164,10 +168,11 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
             polinomio += termino
             #Lo inicializo para la proxima pasada 
             termino = 1
-            
-        polinomio = polinomio.expand()
+        #por el expand si es un solo elemento
+        if len(xi) > 1:
+            polinomio = polinomio.expand() 
         # Escribo el polinomio y pongo la funcion para la especializacion de un punto     
-        self.polinomio.setText(str(polinomio.expand()))
+        self.polinomio.setText(str(polinomio))
         especializacionEnPunto = sym.lambdify(x,polinomio)
 
     def interpolacion_NGProg(self):
@@ -206,7 +211,8 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
             polinomio += termino
             #Lo inicializo para la proxima vuelta
             termino = 1
-        polinomio = polinomio.expand()
+        if len(xi) > 1:
+            polinomio = polinomio.expand() 
         #Seteo la info en el el cuadro de texto del polinomio y pongo la funcion para especializar el punto
         self.polinomio.setText(str(polinomio.expand()))
         especializacionEnPunto = sym.lambdify(x,polinomio)
