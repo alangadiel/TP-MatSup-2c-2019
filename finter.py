@@ -10,8 +10,6 @@ import sympy as sym
 
 modo = ["Lagrange","NG Progresivo", "NG Regresivo"]
 
-modoSeleccionado = 1
-
 mostrarPasos = []
 
 
@@ -27,12 +25,13 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
+        self.modoSeleccionado = 1
         self.setupUi(self)
         self.agregar.clicked.connect(self.agregar_app)
         self.especializarPunto.clicked.connect(self.especializarPunto_app)
         self.mostrarPasos.clicked.connect(self.mostrarPasos_app)
         self.cambiarModo.clicked.connect(self.cambiarModo_app)
-        self.finalizar.clicked.connect(self.interpolacion_NGReg)
+        self.finalizar.clicked.connect(self.finalizar_app)
         self.quitar.clicked.connect(self.quitar_app)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -47,38 +46,58 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         self.tableWidget.setDragDropOverwriteMode(False)
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
-        self.modoInterpolacion.setText(modo[modoSeleccionado])
+        self.modoInterpolacion.setText(modo[self.modoSeleccionado])
 
+
+    def generarPolinomio(self):
+        #no se como generar un switch en python 
+        if self.modoSeleccionado == 0: 
+            self.interpolacion_lagrange()
+        elif self.modoSeleccionado == 1:
+            self.interpolacion_NGProg()
+        else:
+            self.interpolacion_NGReg()
+    
     def agregar_app(self):
-        x = QInputDialog.getInt(self, "Agregar punto","Punto x:", 0, 0, 100000, 1)  
-        y = QInputDialog.getInt(self, "Agregar punto","Punto y:", 0, 0, 100000, 1)    
-        if x and y:
-            xi.append(float(x[0]))
-            yi.append(float(y[0]))
-            row = len(xi)
-            self.tableWidget.setRowCount(row-1)
-            punto = QTableWidgetItem(str(x[0]))
-            imagen = QTableWidgetItem(str(y[0]))
-            self.tableWidget.insertRow(row-1)
-            self.tableWidget.setItem(row-1, 0, punto)
-            self.tableWidget.setItem(row-1, 1, imagen)
+        x, okPressed1 = QInputDialog.getInt(self, "Agregar punto","Punto x:", 0, 0, 100000, 1)  
+        y, okPressed2 = QInputDialog.getInt(self, "Agregar punto","Punto y:", 0, 0, 100000, 1)    
+        if okPressed2 and okPressed1 and x and y:
+            try:
+                xi.append(float(x))
+                yi.append(float(y))
+                row = len(xi)
+                self.tableWidget.setRowCount(row-1)
+                punto = QTableWidgetItem(str(x))
+                imagen = QTableWidgetItem(str(y))
+                self.tableWidget.insertRow(row-1)
+                self.tableWidget.setItem(row-1, 0, punto)
+                self.tableWidget.setItem(row-1, 1, imagen)
+                self.generarPolinomio()
+            except:
+                msgBox = QMessageBox.critical(self,"Datos incorrectos","Vuelva a intentarlo")
 
     def quitar_app(self):
         if len(yi) != 0:
-            xi.pop()
-            yi.pop()
-            row = len(xi)
-            self.tableWidget.removeRow(row)
-            self.tableWidget.setRowCount(row)
+            try:
+                xi.pop()
+                yi.pop()
+                row = len(xi)
+                self.tableWidget.removeRow(row)
+                self.tableWidget.setRowCount(row)
+                self.generarPolinomio()
+            except:    
+                msgBox = QMessageBox.critical(self,"Datos incorrectos","Vuelva a intentarlo")        
         else:
             QMessageBox.about(self, "Mensaje","La lista esta vacia")
 
     def mostrarPasos_app(self):
-        if modoSeleccionado == 0:
-            self.mostrarLagrange()
-        else: 
-            self.mostrarNGP()
-
+        if len(mostrarPasos) > 0:
+            if self.modoSeleccionado == 0:
+                self.mostrarLagrange()
+            else: 
+                self.mostrarNGP()
+        else:
+            QMessageBox.about(self, "Mensaje","No hay ningun polinomio todavia")
 
     def mostrarLagrange(self):
         string = ""
@@ -95,15 +114,22 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
     
 
     def especializarPunto_app(self):
-        punto, okPressed = QInputDialog.getText(self, "Especializar en un punto","Punto:", QLineEdit.Normal, "")
-        funcion = self.polinomio.text()
-        funcion = sym.lambdify('x',funcion)
-        QMessageBox.about(self, "Punto de especializacion", "El punto es " + str(funcion(int(punto))))
+        if  len(mostrarPasos) > 0:
+            punto, okPressed = QInputDialog.getText(self, "Especializar en un punto","Punto:", QLineEdit.Normal, "")
+            if okPressed and punto:
+                funcion = self.polinomio.text()
+                funcion = sym.lambdify('x',funcion)
+                QMessageBox.about(self, "Punto de especializacion", "El punto es " + str(funcion(int(punto))))
+        else: 
+            QMessageBox.about(self, "Mensaje","No hay ningun polinomio todavia")
+
 
     def cambiarModo_app(self):
-        item, okPressed = QInputDialog.getItem(self, "Cambiar de modo","Modo:", modo, 0, False)
-        modoSeleccionado = modo.index(item)
-        self.modoInterpolacion.setText(modo[modoSeleccionado])
+        index = self.modoSeleccionado
+        item, okPressed = QInputDialog.getItem(self, "Cambiar de modo","Modo:", modo, index, False)
+        if okPressed:
+            self.modoSeleccionado = modo.index(item)
+            self.modoInterpolacion.setText(modo[self.modoSeleccionado])
 
     def finalizar_app(self):
         sys.exit(app.exec_())
