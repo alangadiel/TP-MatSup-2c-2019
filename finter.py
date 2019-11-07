@@ -3,9 +3,17 @@ import re
 import math
 from PyQt5 import uic, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QTableWidgetItem, QLineEdit, QMessageBox, QAbstractItemView
+import numpy as np
+import sympy as sym
+
+
+
 modo = ["Lagrange","NG Progresivo", "NG Regresivo"]
 
 modoSeleccionado = 0
+
+mostrarPasos = []
+
 
 xi = []
 yi = []
@@ -24,7 +32,7 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         self.especializarPunto.clicked.connect(self.especializarPunto_app)
         self.mostrarPasos.clicked.connect(self.mostrarPasos_app)
         self.cambiarModo.clicked.connect(self.cambiarModo_app)
-        self.finalizar.clicked.connect(self.finalizar_app)
+        self.finalizar.clicked.connect(self.interpolacion_lagrange)
         self.quitar.clicked.connect(self.quitar_app)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -54,8 +62,6 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
             self.tableWidget.insertRow(row-1)
             self.tableWidget.setItem(row-1, 0, punto)
             self.tableWidget.setItem(row-1, 1, imagen)
-            print(xi)
-            print(yi)
 
     def quitar_app(self):
         if len(yi) != 0:
@@ -68,11 +74,16 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
             QMessageBox.about(self, "Mensaje","La lista esta vacia")
 
     def mostrarPasos_app(self):
-        QMessageBox.about(self, "Punto de especializacion", "El punto es")
+        string = ""
+        for i in range(len(mostrarPasos)):        
+            string += "L" + str(i) + ": " + str(mostrarPasos[i]) + "\n"
+        QMessageBox.about(self, "Punto de especializacion", string)
 
     def especializarPunto_app(self):
         punto, okPressed = QInputDialog.getText(self, "Especializar en un punto","Punto:", QLineEdit.Normal, "")
-        QMessageBox.about(self, "Punto de especializacion", "El punto es " + punto)
+        funcion = self.polinomio.text()
+        funcion = sym.lambdify('x',funcion)
+        QMessageBox.about(self, "Punto de especializacion", "El punto es " + str(funcion(int(punto))))
 
     def cambiarModo_app(self):
         item, okPressed = QInputDialog.getItem(self, "Cambiar de modo","Modo:", modo, 0, False)
@@ -82,7 +93,25 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
     def finalizar_app(self):
         sys.exit(app.exec_())
 
-    #def interpolacion_lagrange(self):
+    def interpolacion_lagrange(self):
+        n = len(xi)
+        x = sym.Symbol('x')
+        mostrarPasos.clear()
+        # Polinomio
+        polinomio = 0
+        for i in range(0,n,1):
+            # Termino de Lagrange
+            termino = 1
+            for j  in range(0,n,1):
+                if (j!=i):
+                    termino = termino*(x-xi[j])/(xi[i]-xi[j])
+            polinomio = polinomio + termino*yi[i]
+            mostrarPasos.append(termino)
+        # Simplifica el polinomio obtenido 
+        self.polinomio.setText(str(polinomio.expand()))
+        # para evaluacion numérica
+        especializacionEnPunto = sym.lambdify(x,polinomio)
+    
         
     #def interpolacion_NGProg(self):
     
