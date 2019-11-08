@@ -5,6 +5,7 @@ from PyQt5 import uic, QtWidgets
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QTableWidgetItem, QLineEdit, QMessageBox, QAbstractItemView
 import numpy as np
 import sympy as sym
+from scipy.interpolate import lagrange
 
 modo = ["Lagrange","NG Progresivo", "NG Regresivo"]
 
@@ -172,6 +173,28 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         print(polinomio)
         # para evaluacion numérica
         especializacionEnPunto = sym.lambdify(x,polinomio)
+    
+    
+    def lagrangePoly(self, data, STEPS=False, K=None):
+        X = [i[0] for i in data]
+        Y = [i[1] for i in data]
+        poly = lagrange(X, Y)
+
+        if STEPS:
+            for i in range(0, len(data)):
+                aux = data[i][1]
+                data[i][1] = 0
+                Y_sub = [j[1] for j in data]
+                poly_sub = lagrange(X, Y_sub)
+                data[i][1] = aux
+                print(f"L{i}(X): \n", poly - poly_sub)
+                print('---------------------------------------------------------')
+
+
+        print('Lagrange Polynomial: \n', poly)
+        if K != None:
+            print('---------------------------------------------------------')
+            print(f'With K equal to {K} the result is:', np.polyval([K], poly))
     
         
     def interpolacion_NGReg(self):
