@@ -101,18 +101,21 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def mostrarLagrange(self):
         string = "grado polinomio:" + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
+        string += "Es equiespaciado:" + self.puntosEquidistantes() + "\n"
         for i in range(len(mostrarPasos)):        
             string += "L" + str(i) + ": " + str(mostrarPasos[i]) + "\n"
         QMessageBox.about(self, "Mostrar Pasos", string)
     
     def mostrarNGR(self):
         string = "grado polinomio:" + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
+        string += "Es equiespaciado:" + self.puntosEquidistantes() + "\n\n"
         for i in range(len(mostrarPasos[0])):        
             string += "b" + str(i) + ": " + str(mostrarPasos[0][i]) + "\n"
         QMessageBox.about(self, "mostrarPasos", string)
     
     def mostrarNGP(self):
         string = "grado polinomio:" + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
+        string += "Es equiespaciado:" + self.puntosEquidistantes() + "\n\n"
         contador = 0
         print(mostrarPasos[0])
         for i in range(len(mostrarPasos[0]), 0, -1):        
@@ -272,6 +275,20 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
             resultado = polinomio[pos+2:pos+3]
         return resultado
 
+    def puntosEquidistantes(self):
+        resultado = True
+        if len(xi) > 2:
+            # -3 porque tomo el elemento i y dos mas sino me rompe el array
+            for i in range(0, len(xi)-2, 1):
+                difx1 = xi[i] - xi[i+1]
+                difx2 = xi[i+1] - xi[i+2]
+                dify1 = yi[i] - yi[i+1]
+                dify2 = yi[i+1] - yi[i+2]
+                if difx1 != difx2 or dify1 != dify2:
+                    resultado = False
+        return str(resultado)
+                
+            
 if __name__ == "__main__":
     app =  QtWidgets.QApplication(sys.argv)
     window = FINTER()
