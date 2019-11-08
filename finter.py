@@ -116,11 +116,9 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
     def mostrarNGP(self):
         string = "grado polinomio:" + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
         string += "Es equiespaciado:" + self.puntosEquidistantes() + "\n\n"
-        contador = 0
         print(mostrarPasos[0])
-        for i in range(len(mostrarPasos[0]), 0, -1):        
-            string += "a" + str(contador) + ": " + str(mostrarPasos[0][i-1]) + "\n"
-            contador += 1
+        for i in range(len(mostrarPasos[0])):       
+            string += "a" + str(i) + ": " + str(mostrarPasos[0][i]) + "\n"
         QMessageBox.about(self, "mostrarPasos", string)
     
 
@@ -188,25 +186,29 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         #de adelante hacia atras dejando el valor el valor de a que necesito para
         #generar el polinomio 
         #La ultima posicicon del vector a eliminando el valor de yi que no necesito mas
+        
+        aux =[]
+        aux.append(a[n-1])
         for j in range(1, n):
             #Hago las diferencia finita entre yi y yi+1
             for i in range(n-1, j-1, -1):
                 a[i] = float(a[i]-a[i-1])/float(xi[i]-xi[i-j])
+            aux.append(a[n-1])
+            print(aux)
         #Pongo en la primera posicion de el vector a el valor de yi que me importa para
-        #generar el polinomio 
-        a[0] = yi[n-1]
-        mostrarPasos.append(a)
+        #generar el polinomio
+        mostrarPasos.append(aux)
         
         #Genero el polinomio 
-        polinomio = a[0]
+        polinomio = aux[0]
         termino = 1
 
         #Recorre el vector de bn y los multiplica por sus (x - xn) pertenecientes
-        for h in range (1, len(a), 1):
+        for h in range (1, len(aux), 1):
             #Genero el termino y despues lo sumo
             for k in range(0, h, 1):
                 termino *= (x-xi[n-k-1])
-            termino *= a[h]
+            termino *= aux[h]
             polinomio += termino
             #Lo inicializo para la proxima pasada 
             termino = 1
@@ -224,40 +226,42 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         a = []
         termino = yi
         mostrarPasos.clear()
+
         #Inicializo a con los valores de la imagen(yi)
         for i in range(n):
             a.append(yi[i])
 
+        aux = []
         #Recorro los valores de la imagen para generar las diferencias finitas de orden 1
         #Y los agrego las diferencias finitas en el vector a eliminando los valores de la imagen 
         #Que ya no me sirven, de adelante hacia atras. Y vuelvo a iterar haciendo lo mismo (cantidad de puntos -1 ) veces
         for j in range(1, n):
+            #Lo uso para sacar los an en un vector aparte
+            aux.append(a[0])
             #Aca hago las diferencias finitas 
             for i in range(0, n-j, 1):
                 a[i] = float(a[i+1]-a[i])/float(xi[i+j]-xi[i])
-        #Le agrego el unico valor de la imagen que me interesa en la ultima posicion del vector
-        a[n-1] = yi[0]
-        mostrarPasos.append(a)
+        aux.append(a[0])
+        mostrarPasos.append(aux)
         
         #Genero el polinomio 
-        polinomio = a[n-1]
+        polinomio = aux[0]
         termino = 1
         #Recorro el vector a tantas veces como elementos tenga
-        for h in range (1, len(a), 1):
+        for h in range (1, len(aux), 1):
             #Dependiendo de cual es la posicion de el elemento
             #Lo multiplico por (x-xn)
             for k in range(0, h, 1):
                 termino *= (x-xi[k])
-            termino *= a[n-h-1]
+            termino *= aux[h]
             #Le sumo el termino al polinomio
+            #print(polinomio)
             polinomio += termino
             #Lo inicializo para la proxima vuelta
             termino = 1
 
         #Le paso los valores a mostrarPasos para poder mostrarlos 
         #y doy vuelta la lista poque esta al reves
-       
-
         if len(xi) > 1:
             polinomio = polinomio.expand() 
         #Seteo la info en el el cuadro de texto del polinomio y pongo la funcion para especializar el punto
