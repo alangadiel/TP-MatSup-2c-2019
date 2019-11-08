@@ -82,9 +82,12 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
                 row = len(xi)
                 self.tableWidget.removeRow(row)
                 self.tableWidget.setRowCount(row)
-                self.generarPolinomio()
+                if len(xi) != 0:
+                    self.generarPolinomio()
+                else:
+                    self.polinomio.setText("")
             except:    
-                msgBox = QMessageBox.critical(self,"Datos incorrectos","Vuelva a intentarlo")        
+                msgBox = QMessageBox.critical(self,"Error","Error al eliminar")        
         else:
             QMessageBox.about(self, "Mensaje","La lista esta vacia")
 
@@ -100,22 +103,22 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
             QMessageBox.about(self, "Mensaje","No hay ningun polinomio todavia")
 
     def mostrarLagrange(self):
-        string = "grado polinomio:" + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
-        string += "Es equiespaciado:" + self.puntosEquidistantes() + "\n"
+        string = "grado polinomio: " + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
+        string += "Es equiespaciado: " + self.puntosEquidistantes() + "\n"
         for i in range(len(mostrarPasos)):        
             string += "L" + str(i) + ": " + str(mostrarPasos[i]) + "\n"
         QMessageBox.about(self, "Mostrar Pasos", string)
     
     def mostrarNGR(self):
-        string = "grado polinomio:" + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
-        string += "Es equiespaciado:" + self.puntosEquidistantes() + "\n\n"
+        string = "grado polinomio: " + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
+        string += "Es equiespaciado: " + self.puntosEquidistantes() + "\n\n"
         for i in range(len(mostrarPasos[0])):        
             string += "b" + str(i) + ": " + str(mostrarPasos[0][i]) + "\n"
         QMessageBox.about(self, "mostrarPasos", string)
     
     def mostrarNGP(self):
-        string = "grado polinomio:" + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
-        string += "Es equiespaciado:" + self.puntosEquidistantes() + "\n\n"
+        string = "grado polinomio: " + str(self.obtenerGradoPolinomio(self.polinomio.text())) + "\n"
+        string += "Es equiespaciado: " + self.puntosEquidistantes() + "\n\n"
         print(mostrarPasos[0])
         for i in range(len(mostrarPasos[0])):       
             string += "a" + str(i) + ": " + str(mostrarPasos[0][i]) + "\n"
@@ -181,12 +184,9 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
         for i in range(n):
             a.append(yi[i])
 
-        #Recorre los puntos yi generando las diferencias finitas de orden 1
-        #Una vez generadas las diferencias finitas las pongo en el vector a 
-        #de adelante hacia atras dejando el valor el valor de a que necesito para
-        #generar el polinomio 
-        #La ultima posicicon del vector a eliminando el valor de yi que no necesito mas
-        
+        #Va generando las distintas columnas de orden n en el vector a (Voy sobrescribiendo)
+        #En aux voy agregando los valores que voy a necesitar 
+
         aux =[]
         aux.append(a[n-1])
         for j in range(1, n):
@@ -195,7 +195,7 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
                 a[i] = float(a[i]-a[i-1])/float(xi[i]-xi[i-j])
             aux.append(a[n-1])
             print(aux)
-        #Pongo en la primera posicion de el vector a el valor de yi que me importa para
+
         #generar el polinomio
         mostrarPasos.append(aux)
         
@@ -232,9 +232,9 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
             a.append(yi[i])
 
         aux = []
-        #Recorro los valores de la imagen para generar las diferencias finitas de orden 1
-        #Y los agrego las diferencias finitas en el vector a eliminando los valores de la imagen 
-        #Que ya no me sirven, de adelante hacia atras. Y vuelvo a iterar haciendo lo mismo (cantidad de puntos -1 ) veces
+        
+        #Genero las columnas de orden n con las diferencias finitas en el vector a (Voy sobrescribiendo)
+        #En aux guardo los valores que voy a necesitar
         for j in range(1, n):
             #Lo uso para sacar los an en un vector aparte
             aux.append(a[0])
