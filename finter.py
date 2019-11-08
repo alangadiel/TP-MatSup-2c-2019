@@ -59,7 +59,7 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
     def agregar_app(self):
         x, okPressed1 = QInputDialog.getInt(self, "Agregar punto","Punto x:", 0, 0, 100000, 1)  
         y, okPressed2 = QInputDialog.getInt(self, "Agregar punto","Punto y:", 0, 0, 100000, 1)    
-        if okPressed2 and okPressed1 and x and y:
+        if okPressed2 and okPressed1:
             try:
                 xi.append(float(x))
                 yi.append(float(y))
