@@ -132,7 +132,7 @@ class FINTER(QtWidgets.QMainWindow, Ui_MainWindow):
             if okPressed and punto:
                 funcion = self.polinomio.text()
                 funcion = sym.lambdify('x',funcion)
-                QMessageBox.about(self, "Punto de especializacion", "El punto es " + str(funcion(int(punto))))
+                QMessageBox.about(self, "Punto de especializacion", "El punto es " + str(round(funcion(int(punto)),10)))
         else: 
             QMessageBox.about(self, "Mensaje","No hay ningun polinomio todavia")
 
